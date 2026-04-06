@@ -16,6 +16,19 @@ const getSingleUserFromDB = async (id: string) => {
   return result;
 };
 
+const getMeFromDB = async (email: string) => {
+  const result = await User.findOne({ email });
+  return result;
+};
+
+const updateProfileIntoDB = async (email: string, payload: Partial<TUser>) => {
+  const result = await User.findOneAndUpdate({ email }, payload, {
+    new: true,
+    runValidators: true,
+  });
+  return result;
+};
+
 const updateOnlineStatus = async (id: string, status: boolean) => {
   const result = await User.findByIdAndUpdate(
     id,
@@ -29,5 +42,7 @@ export const UserServices = {
   createUserIntoDB,
   getAllUsersFromDB,
   getSingleUserFromDB,
+  getMeFromDB,
+  updateProfileIntoDB,
   updateOnlineStatus,
 };

@@ -4,6 +4,7 @@ import { AuthRoutes } from '../../modules/auth/auth.route.js';
 import { PostRoutes } from '../../modules/post/post.route.js';
 import { CommentRoutes } from '../../modules/comment/comment.route.js';
 import { ReplyRoutes } from '../../modules/reply/reply.route.js';
+import { StoryRoutes } from '../../modules/story/story.route.js';
 
 const router = Router();
 
@@ -27,6 +28,10 @@ const moduleRoutes = [
   {
     path: '/replies',
     route: ReplyRoutes,
+  },
+  {
+    path: '/stories',
+    route: StoryRoutes,
   },
 ];
 

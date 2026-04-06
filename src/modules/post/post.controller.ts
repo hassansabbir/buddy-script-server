@@ -6,7 +6,8 @@ import { sendImageToCloudinary } from '../../app/utils/cloudinary.js';
 import { User } from '../user/user.model.js';
 
 const createPost = catchAsync(async (req, res) => {
-  const { content, visibility } = req.body;
+  const { content, visibility: rawVisibility } = req.body;
+  const visibility = ((rawVisibility as string)?.toLowerCase() as 'public' | 'private') || 'public';
   const user = await User.findOne({ email: req.user.email });
 
   if (!user) {

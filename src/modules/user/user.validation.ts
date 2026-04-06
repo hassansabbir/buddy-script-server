@@ -7,6 +7,8 @@ const createUserValidationSchema = z.object({
     email: z.string().email('Invalid email address'),
     password: z.string().min(6, 'Password must be at least 6 characters'),
     profileImage: z.string().optional(),
+    nickname: z.string().optional(),
+    address: z.string().optional(),
   }),
 });
 
@@ -14,6 +16,8 @@ const updateUserValidationSchema = z.object({
   body: z.object({
     firstName: z.string().optional(),
     lastName: z.string().optional(),
+    nickname: z.string().optional(),
+    address: z.string().optional(),
     profileImage: z.string().optional(),
     isOnline: z.boolean().optional(),
   }),

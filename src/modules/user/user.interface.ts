@@ -5,6 +5,8 @@ export type TUser = {
   lastName: string;
   email: string;
   password?: string;
+  nickname?: string;
+  address?: string;
   profileImage?: string;
   role: 'user' | 'admin';
   isOnline: boolean;

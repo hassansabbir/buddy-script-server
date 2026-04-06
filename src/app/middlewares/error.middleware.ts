@@ -26,7 +26,18 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
   } else if (err instanceof Error) {
     message = err.message;
     errorSources = [{ path: '', message: err.message }];
+  } else if (err && typeof err === 'object') {
+    // Handling plain objects (like some Cloudinary errors)
+    message = err.message || (err as any).error?.message || 'Something went wrong!';
+    errorSources = [{ path: '', message: message }];
   }
+
+  // Always log to console for server-side debugging
+  console.error('>>> [API ERROR]', {
+    message,
+    stack: err?.stack,
+    rawError: err
+  });
 
   return res.status(statusCode).json({
     success: false,

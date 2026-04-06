@@ -8,9 +8,10 @@ import router from './app/routes/index.js';
 const app: Application = express();
 
 // Parsers
-app.use(express.json());
+app.use(express.json({ limit: '25mb' }));
+app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 app.use(cookieParser());
-app.use(cors({ origin: ['http://localhost:3000', 'http://10.10.7.47:3001'], credentials: true }));
+app.use(cors({ origin: ['http://localhost:3000', 'http://localhost:3001', 'http://10.10.7.47:3001'], credentials: true }));
 app.use(morgan('dev'));
 
 // Application Routes
