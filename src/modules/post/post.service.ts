@@ -3,13 +3,18 @@ import { Post } from './post.model.js';
 
 const createPostIntoDB = async (payload: TPost) => {
   const result = await Post.create(payload);
-  return result;
+  return await result.populate('author', 'firstName lastName profileImage nickname');
 };
 
-const getPublicPostsFromDB = async () => {
-  const result = await Post.find({ visibility: 'public', isDeleted: false })
-    .populate('author', 'firstName lastName profileImage')
-    .sort({ createdAt: -1 });
+const getAllPostsFromDB = async (userId: string) => {
+  const result = await Post.find({
+    $or: [
+      { visibility: 'public', isDeleted: false },
+      { author: userId, isDeleted: false },
+    ],
+  })
+    .sort({ createdAt: -1 })
+    .populate('author', 'firstName lastName profileImage nickname');
   return result;
 };
 
@@ -26,30 +31,28 @@ const toggleLikePost = async (postId: string, userId: string) => {
     throw new Error('Post not found');
   }
 
-  const isLiked = post.likes.includes(userId as any);
+  const isLiked = post.likes.some((id) => id.toString() === userId);
 
   if (isLiked) {
     // unlike
-    const result = await Post.findByIdAndUpdate(
+    return await Post.findByIdAndUpdate(
       postId,
       { $pull: { likes: userId } },
       { new: true },
-    );
-    return result;
+    ).populate('author', 'firstName lastName profileImage nickname');
   } else {
     // like
-    const result = await Post.findByIdAndUpdate(
+    return await Post.findByIdAndUpdate(
       postId,
       { $addToSet: { likes: userId } },
       { new: true },
-    );
-    return result;
+    ).populate('author', 'firstName lastName profileImage nickname');
   }
 };
 
 export const PostServices = {
   createPostIntoDB,
-  getPublicPostsFromDB,
+  getAllPostsFromDB,
   getMyPostsFromDB,
   toggleLikePost,
 };

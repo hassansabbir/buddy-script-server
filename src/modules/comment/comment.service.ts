@@ -1,9 +1,11 @@
 import { TComment } from './comment.interface.js';
 import { Comment } from './comment.model.js';
+import { Post } from '../post/post.model.js';
 
 const createCommentIntoDB = async (payload: TComment) => {
   const result = await Comment.create(payload);
-  return result;
+  await Post.findByIdAndUpdate(payload.postId, { $inc: { commentCount: 1 } });
+  return await result.populate('userId', 'firstName lastName profileImage');
 };
 
 const getCommentsByPostIdFromDB = async (postId: string) => {

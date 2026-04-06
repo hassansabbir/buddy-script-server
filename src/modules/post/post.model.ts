@@ -12,6 +12,7 @@ const postSchema = new Schema<TPost>(
       default: 'public',
     },
     likes: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    commentCount: { type: Number, default: 0 },
     isDeleted: { type: Boolean, default: false },
   },
   {

@@ -1,89 +1,72 @@
+import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import catchAsync from '../../app/utils/catchAsync.js';
 import sendResponse from '../../app/utils/sendResponse.js';
 import { PostServices } from './post.service.js';
 import { sendImageToCloudinary } from '../../app/utils/cloudinary.js';
-import { User } from '../user/user.model.js';
 
-const createPost = catchAsync(async (req, res) => {
-  const { content, visibility: rawVisibility } = req.body;
-  const visibility = ((rawVisibility as string)?.toLowerCase() as 'public' | 'private') || 'public';
-  const user = await User.findOne({ email: req.user.email });
-
-  if (!user) {
-    throw new Error('User not found');
-  }
-
+const createPost = catchAsync(async (req: Request, res: Response) => {
   let media = '';
+  
   if (req.file) {
-    const imageName = `${user.firstName}-${Date.now()}`;
+    const imageName = `post-${req.user._id}-${Date.now()}`;
     const path = req.file.path;
     const cloudinaryResponse = await sendImageToCloudinary(imageName, path);
+    if (!cloudinaryResponse || !cloudinaryResponse.secure_url) {
+      throw new Error('Failed to upload image to Cloudinary.');
+    }
     media = cloudinaryResponse.secure_url;
   }
 
   const result = await PostServices.createPostIntoDB({
-    author: user._id,
-    content,
-    visibility,
+    ...req.body,
     media,
-    likes: [],
-    isDeleted: false,
+    author: req.user._id as string,
   });
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Post created successfully',
+    message: 'Post is created successfully',
     data: result,
   });
 });
 
-const getPublicPosts = catchAsync(async (req, res) => {
-  const result = await PostServices.getPublicPostsFromDB();
+const getAllPosts = catchAsync(async (req: Request, res: Response) => {
+  const result = await PostServices.getAllPostsFromDB(req.user._id as string);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Public posts retrieved successfully',
+    message: 'Posts are retrieved successfully',
     data: result,
   });
 });
 
-const getMyPosts = catchAsync(async (req, res) => {
-  const user = await User.findOne({ email: req.user.email });
-  if (!user) {
-    throw new Error('User not found');
-  }
-  const result = await PostServices.getMyPostsFromDB(user._id.toString());
+const getMyPosts = catchAsync(async (req: Request, res: Response) => {
+  const result = await PostServices.getMyPostsFromDB(req.user._id as string);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'My posts retrieved successfully',
+    message: 'My posts are retrieved successfully',
     data: result,
   });
 });
 
-const toggleLike = catchAsync(async (req, res) => {
+const toggleLikePost = catchAsync(async (req: Request, res: Response) => {
   const { postId } = req.params;
-  const user = await User.findOne({ email: req.user.email });
-  if (!user) {
-    throw new Error('User not found');
-  }
-  const result = await PostServices.toggleLikePost(
-    postId as string,
-    user._id.toString(),
-  );
+  const userId = req.user._id as string;
+  const result = await PostServices.toggleLikePost(postId as string, userId);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Post like toggled successfully',
+    message: 'Post liked/unliked successfully',
     data: result,
   });
 });
 
-export const PostController = {
+export const PostControllers = {
   createPost,
-  getPublicPosts,
+  getAllPosts,
   getMyPosts,
-  toggleLike,
+  toggleLikePost,
 };

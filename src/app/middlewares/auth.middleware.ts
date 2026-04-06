@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import config from '../config/index.js';
 import catchAsync from '../utils/catchAsync.js';
+import { User } from '../../modules/user/user.model.js';
 
 const auth = (...requiredRoles: string[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
@@ -17,13 +18,18 @@ const auth = (...requiredRoles: string[]) => {
       config.jwt_access_secret as string,
     ) as JwtPayload;
 
-    const { role, email } = decoded;
+    const { email, role } = decoded;
 
     if (requiredRoles.length && !requiredRoles.includes(role)) {
       throw new Error('You are not authorized!');
     }
 
-    req.user = decoded as JwtPayload;
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new Error('User not found!');
+    }
+
+    req.user = user;
     next();
   });
 };

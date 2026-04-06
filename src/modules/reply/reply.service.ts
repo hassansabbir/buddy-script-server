@@ -1,9 +1,15 @@
 import { TReply } from './reply.interface.js';
 import { Reply } from './reply.model.js';
+import { Comment } from '../comment/comment.model.js';
+import { Post } from '../post/post.model.js';
 
 const createReplyIntoDB = async (payload: TReply) => {
   const result = await Reply.create(payload);
-  return result;
+  const comment = await Comment.findById(payload.commentId);
+  if (comment) {
+    await Post.findByIdAndUpdate(comment.postId, { $inc: { commentCount: 1 } });
+  }
+  return await result.populate('userId', 'firstName lastName profileImage');
 };
 
 const getRepliesByCommentIdFromDB = async (commentId: string) => {

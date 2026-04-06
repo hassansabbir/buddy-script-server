@@ -6,5 +6,6 @@ export type TPost = {
   media?: string;
   visibility: 'public' | 'private';
   likes: Types.ObjectId[];
+  commentCount: number;
   isDeleted: boolean;
 };

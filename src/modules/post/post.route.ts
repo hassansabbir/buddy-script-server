@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { PostController } from './post.controller.js';
+import { PostControllers } from './post.controller.js';
 import auth from '../../app/middlewares/auth.middleware.js';
 import { upload } from '../../app/utils/multer.js';
 
@@ -9,13 +9,25 @@ router.post(
   '/',
   auth('user', 'admin'),
   upload.single('media'),
-  PostController.createPost,
+  PostControllers.createPost,
 );
 
-router.get('/', PostController.getPublicPosts);
+router.get(
+  '/',
+  auth('user', 'admin'),
+  PostControllers.getAllPosts,
+);
 
-router.get('/me', auth('user', 'admin'), PostController.getMyPosts);
+router.get(
+  '/my-posts',
+  auth('user', 'admin'),
+  PostControllers.getMyPosts,
+);
 
-router.patch('/:postId/like', auth('user', 'admin'), PostController.toggleLike);
+router.patch(
+  '/:postId/like',
+  auth('user', 'admin'),
+  PostControllers.toggleLikePost,
+);
 
 export const PostRoutes = router;

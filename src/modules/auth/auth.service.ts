@@ -29,6 +29,7 @@ const loginUser = async (payload: TLoginUser) => {
   }
 
   const jwtPayload = {
+    _id: user._id.toString(),
     email: user.email,
     role: user.role,
   };

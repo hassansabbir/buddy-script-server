@@ -1,20 +1,16 @@
+import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import catchAsync from '../../app/utils/catchAsync.js';
 import sendResponse from '../../app/utils/sendResponse.js';
 import { CommentServices } from './comment.service.js';
-import { User } from '../user/user.model.js';
 
-const createComment = catchAsync(async (req, res) => {
+const createComment = catchAsync(async (req: Request, res: Response) => {
   const { postId, content } = req.body;
-  const user = await User.findOne({ email: req.user.email });
-
-  if (!user) {
-    throw new Error('User not found');
-  }
+  const userId = req.user._id;
 
   const result = await CommentServices.createCommentIntoDB({
     postId,
-    userId: user._id.toString() as any,
+    userId,
     content,
     likes: [],
     isDeleted: false,
@@ -28,7 +24,7 @@ const createComment = catchAsync(async (req, res) => {
   });
 });
 
-const getCommentsByPost = catchAsync(async (req, res) => {
+const getCommentsByPost = catchAsync(async (req: Request, res: Response) => {
   const { postId } = req.params;
   const result = await CommentServices.getCommentsByPostIdFromDB(postId as string);
   sendResponse(res, {
@@ -39,15 +35,12 @@ const getCommentsByPost = catchAsync(async (req, res) => {
   });
 });
 
-const toggleLike = catchAsync(async (req, res) => {
+const toggleLike = catchAsync(async (req: Request, res: Response) => {
   const { commentId } = req.params;
-  const user = await User.findOne({ email: req.user.email });
-  if (!user) {
-    throw new Error('User not found');
-  }
+  const userId = req.user._id;
   const result = await CommentServices.toggleLikeComment(
     commentId as string,
-    user._id.toString(),
+    userId.toString(),
   );
   sendResponse(res, {
     statusCode: httpStatus.OK,
