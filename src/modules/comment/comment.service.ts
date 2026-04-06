@@ -28,14 +28,14 @@ const toggleLikeComment = async (commentId: string, userId: string) => {
       commentId,
       { $pull: { likes: userId } },
       { new: true },
-    );
+    ).populate('userId', 'firstName lastName profileImage');
     return result;
   } else {
     const result = await Comment.findByIdAndUpdate(
       commentId,
       { $addToSet: { likes: userId } },
       { new: true },
-    );
+    ).populate('userId', 'firstName lastName profileImage');
     return result;
   }
 };
